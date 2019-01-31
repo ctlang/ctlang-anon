@@ -1,0 +1,17 @@
+OASISFormat: 0.4
+Name:        ctlang
+Version:     0.1
+Synopsis:    Compiler for the CTLang programming language
+Authors:     Anonymous
+Homepage:    https://pldi2019.hotcrp.com/paper/221
+License:     MIT
+Plugins:     META (0.4), DevFiles (0.4)
+BuildDepends: llvm, llvm.analysis, llvm.bitwriter, llvm.executionengine, llvm.target, llvm.passmgr_builder, llvm.irreader, llvm.linker, llvm.transform_utils, llvm.scalar_opts, llvm.vectorize, llvm.ipo, core, threads, ppx_deriving.std, lwt.unix, ANSITerminal, dolog, str, z3
+OCamlVersion: >= 4.06
+AlphaFeatures: ocamlbuild_more_args
+XOCamlbuildPluginTags: package(cppo_ocamlbuild)
+
+Executable ctlang
+  Path:       src
+  BuildTools: ocamlbuild
+  MainIs:     ctlang.ml

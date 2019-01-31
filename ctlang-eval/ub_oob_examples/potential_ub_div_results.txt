@@ -1,0 +1,1 @@
+potential_ub_div.ctlang:8:19-22: error: value could be #x00000000

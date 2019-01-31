@@ -1,0 +1,86 @@
+void _salsa_keysetup(
+    secret mut uint32[16] ctx,
+    secret uint8[32] k) {
+  public uint32[16] TR = [ 0, 5, 10, 15, 12, 1, 6, 11, 8, 13, 2, 7, 4, 9, 14, 3 ];
+  ctx[ 5]  = load_le(view(k,  0, 4));
+  ctx[10]  = load_le(view(k,  4, 4));
+  ctx[15]  = load_le(view(k,  8, 4));
+  ctx[12]  = load_le(view(k, 12, 4));
+  ctx[ 7] = load_le(view(k, 16, 4));
+  ctx[ 4] = load_le(view(k, 20, 4));
+  ctx[ 9] = load_le(view(k, 24, 4));
+  ctx[14] = load_le(view(k, 28, 4));
+  ctx[ 0]  = 0x61707865;
+  ctx[ 1]  = 0x3320646e;
+  ctx[ 2] = 0x79622d32;
+  ctx[ 3] = 0x6b206574;
+}
+
+void _salsa_ivsetup(
+    secret mut uint32[16] ctx,
+    secret uint8[8] iv,
+    public uint8[8] counter) {
+  ctx[ 6] = load_le(view(iv, 0, 4));
+  ctx[11] = load_le(view(iv, 4, 4));
+  ctx[ 8] = load_le(view(counter, 0, 4));
+  ctx[13] = load_le(view(counter, 4, 4));
+}
+
+void _salsa_ivsetup_null(
+    secret mut uint32[16] ctx,
+    secret uint8[8] iv) {
+  ctx[ 6] = load_le(view(iv, 0, 4));
+  ctx[11] = load_le(view(iv, 4, 4));
+  ctx[ 8] = 0;
+  ctx[13] = 0;
+}
+
+void _salsa20_encrypt_bytes(
+    secret mut uint32[16] ctx,
+    secret uint8[] m,
+    secret mut uint8[] c) {
+  u0(ctx, m, c);
+}
+
+public int32
+_crypto_stream_salsa20(
+    secret mut uint8[] c,
+    public uint8[8] n,
+    secret uint8[32] k) {
+  if (len c == 0) {
+    return 0;
+  }
+
+  secret mut uint32[16] ctx = zeros(16);
+  _salsa_keysetup(ctx, k);
+  _salsa_ivsetup_null(ctx, n);
+
+  memzero(c);
+  _salsa20_encrypt_bytes(ctx, c, c);
+
+  smemzero(ctx);
+  return 0;
+}
+
+public int32
+_crypto_stream_salsa20_xor_ic(
+    secret mut uint8[] c,
+    secret uint8[] m,
+    secret uint8[8] n,
+    public uint64 ic_val,
+    secret uint8[32] k) {
+  if (len m == 0) {
+    return 0;
+  }
+
+  public mut uint8[8] ic_bytes = zeros(8);
+  store_le(ic_bytes, ic_val);
+
+  secret mut uint32[16] ctx = zeros(16);
+  _salsa_keysetup(ctx, k);
+  _salsa_ivsetup(ctx, n, ic_bytes);
+  _salsa20_encrypt_bytes(ctx, m, c);
+
+  smemzero(ctx);
+  return 0;
+}
